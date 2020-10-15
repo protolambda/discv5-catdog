@@ -9,7 +9,10 @@ Modifications to both discovery version copies:
 - Strip out v4 files, no need to make it cat-dog-bird
 - Watch for seen nodes, have the catdog copy it over to the other end
 - Intercept revalidation, and make it try both v5.0 and v5.1 pings
-- Catdog instance: same config etc., but two identities, and running both versions!
+
+And then there is the Catdog instance: same config etc., but two identities, two connections, and running both versions!
+The common packages (ENR, enode, UDP connection, log, etc.) this uses the latest Geth as library (which just upgraded into v5.1).
+For the actual discovery code of both versions, minimal copies are used instead.
 
 ## License
 
