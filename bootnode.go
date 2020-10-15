@@ -147,9 +147,18 @@ func (c *BootnodeCmd) Run(ctx context.Context, args ...string) error {
 	if err != nil {
 		return err
 	}
-	gethLogger := log.New()
-	outHandler := log.StreamHandler(os.Stdout, log.TerminalFormat(c.Color))
-	gethLogger.SetHandler(log.LvlFilterHandler(lvl, outHandler))
+
+	mkLogger := func(prefix string) log.Logger {
+		gethLogger := log.New()
+		termfn := log.TerminalFormat(c.Color)
+		outHandler := log.StreamHandler(os.Stdout, log.FormatFunc(func(record *log.Record) []byte {
+			record.Msg = prefix + record.Msg
+			return termfn.Format(record)
+		}))
+		gethLogger.SetHandler(log.LvlFilterHandler(lvl, outHandler))
+		return gethLogger
+	}
+	apiLog := mkLogger("[api] ")
 
 	// Optional HTTP server, to read the ENR from
 	var srv *http.Server
@@ -160,25 +169,25 @@ func (c *BootnodeCmd) Run(ctx context.Context, args ...string) error {
 			Handler: router,
 		}
 		router.HandleFunc("/enr", func(w http.ResponseWriter, req *http.Request) {
-			gethLogger.Info("received ENR API request", "remote", req.RemoteAddr)
+			apiLog.Info("received ENR API request", "remote", req.RemoteAddr)
 			w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
 			w.WriteHeader(200)
 			enr := localNodev50.Node().String()
 			_, _ = io.WriteString(w, "v5.0: \n")
 			if _, err := io.WriteString(w, enr); err != nil {
-				gethLogger.Error("failed to respond to request from", "remote", req.RemoteAddr, "err", err)
+				apiLog.Error("failed to respond to request from", "remote", req.RemoteAddr, "err", err)
 			}
 			_, _ = io.WriteString(w, "\n\nv5.1: \n")
 			enr = localNodev51.Node().String()
 			if _, err := io.WriteString(w, enr); err != nil {
-				gethLogger.Error("failed to respond to request from", "remote", req.RemoteAddr, "err", err)
+				apiLog.Error("failed to respond to request from", "remote", req.RemoteAddr, "err", err)
 			}
 		})
 
 		go func() {
-			gethLogger.Info("starting API server, ENR reachable on: http://" + srv.Addr + "/enr")
+			apiLog.Info("starting API server, ENR reachable on: http://" + srv.Addr + "/enr")
 			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				gethLogger.Error("API server listen failure", "err", err)
+				apiLog.Error("API server listen failure", "err", err)
 			}
 		}()
 	}
@@ -189,7 +198,8 @@ func (c *BootnodeCmd) Run(ctx context.Context, args ...string) error {
 		NetRestrict:   nil,
 		BootnodesV50:  bootNodesv50,
 		BootnodesV51:  bootNodesv51,
-		Log:           gethLogger,
+		LogV50:        mkLogger("[v5.0] "),
+		LogV51:        mkLogger("[v5.1] "),
 		ValidSchemes:  enode.ValidSchemes,
 	}
 	cd, err := catdog.NewCatDog(connv50, connv51, localNodev50, localNodev51, &cfg)

@@ -21,7 +21,8 @@ type CatDogConfig struct {
 	NetRestrict  *netutil.Netlist   // network whitelist
 	BootnodesV50 []*enode.Node      // list of bootstrap nodes
 	BootnodesV51 []*enode.Node      // list of bootstrap nodes
-	Log          log.Logger         // if set, log messages go here
+	LogV50       log.Logger         // if set, log messages go here
+	LogV51       log.Logger         // if set, log messages go here
 	ValidSchemes enr.IdentityScheme // allowed identity schemes
 }
 
@@ -70,7 +71,7 @@ func NewCatDog(connv50 gdv5.UDPConn, connv51 gdv5.UDPConn,
 		OnSeen:       cd.OnSeenV50,
 		NetRestrict:  cfg.NetRestrict,
 		Bootnodes:    cfg.BootnodesV50,
-		Log:          cfg.Log,
+		Log:          cfg.LogV50,
 		ValidSchemes: cfg.ValidSchemes,
 	}
 	udp50, err := dv50.ListenV5(connv50, ln50, v50Cfg)
@@ -85,7 +86,7 @@ func NewCatDog(connv50 gdv5.UDPConn, connv51 gdv5.UDPConn,
 		OnSeen:       cd.OnSeenV51,
 		NetRestrict:  cfg.NetRestrict,
 		Bootnodes:    cfg.BootnodesV51,
-		Log:          cfg.Log,
+		Log:          cfg.LogV51,
 		ValidSchemes: cfg.ValidSchemes,
 	}
 	udp51, err := dv51.ListenV5(connv51, ln51, v51Cfg)
