@@ -19,20 +19,21 @@ type CatDogConfig struct {
 
 	// These settings are optional:
 	NetRestrict  *netutil.Netlist   // network whitelist
-	Bootnodes    []*enode.Node      // list of bootstrap nodes
+	BootnodesV50 []*enode.Node      // list of bootstrap nodes
+	BootnodesV51 []*enode.Node      // list of bootstrap nodes
 	Log          log.Logger         // if set, log messages go here
 	ValidSchemes enr.IdentityScheme // allowed identity schemes
 }
 
 type CatDog struct {
-	init chan struct{}
+	init   chan struct{}
 	UDPv50 *dv50.UDPv5
 	UDPv51 *dv51.UDPv5
 }
 
 func (cd *CatDog) Revalidate(n *enode.Node) (uint64, error) {
 	// wait with any revalidation until we have both v5.0 and v5.1 available
-	<- cd.init
+	<-cd.init
 
 	// try hit disc v5.1 first
 	seq, err := cd.UDPv51.PingSeq(n)
@@ -44,20 +45,21 @@ func (cd *CatDog) Revalidate(n *enode.Node) (uint64, error) {
 }
 
 func (cd *CatDog) OnSeenV50(n *enode.Node, at time.Time, liveness uint) {
-	<- cd.init
+	<-cd.init
 	// TODO: just a guess: instead of adding like any node, put it in front of the bucket.
 	// Migrating nodes need an extra hand, right?
-	cd.UDPv51.AddRecentNode(n, at, liveness)  // add to the other table
+	cd.UDPv51.AddRecentNode(n, at, liveness) // add to the other table
 }
 
 func (cd *CatDog) OnSeenV51(n *enode.Node, at time.Time, liveness uint) {
-	<- cd.init
+	<-cd.init
 	// TODO: just a guess: instead of adding like any node, put it in front of the bucket.
 	// Migrating nodes need an extra hand, right?
-	cd.UDPv50.AddRecentNode(n, at, liveness)  // add to the other table
+	cd.UDPv50.AddRecentNode(n, at, liveness) // add to the other table
 }
 
-func NewCatDog(connv50 gdv5.UDPConn, connv51 gdv5.UDPConn, ln *enode.LocalNode, cfg *CatDogConfig) (*CatDog, error) {
+func NewCatDog(connv50 gdv5.UDPConn, connv51 gdv5.UDPConn,
+	ln50 *enode.LocalNode, ln51 *enode.LocalNode, cfg *CatDogConfig) (*CatDog, error) {
 	cd := &CatDog{
 		init: make(chan struct{}),
 	}
@@ -67,11 +69,11 @@ func NewCatDog(connv50 gdv5.UDPConn, connv51 gdv5.UDPConn, ln *enode.LocalNode, 
 		Revalidator:  cd.Revalidate,
 		OnSeen:       cd.OnSeenV50,
 		NetRestrict:  cfg.NetRestrict,
-		Bootnodes:    cfg.Bootnodes,
+		Bootnodes:    cfg.BootnodesV50,
 		Log:          cfg.Log,
 		ValidSchemes: cfg.ValidSchemes,
 	}
-	udp50, err := dv50.ListenV5(connv50, ln, v50Cfg)
+	udp50, err := dv50.ListenV5(connv50, ln50, v50Cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start discv 5.0: %v", err)
 	}
@@ -82,11 +84,11 @@ func NewCatDog(connv50 gdv5.UDPConn, connv51 gdv5.UDPConn, ln *enode.LocalNode, 
 		Revalidator:  cd.Revalidate,
 		OnSeen:       cd.OnSeenV51,
 		NetRestrict:  cfg.NetRestrict,
-		Bootnodes:    cfg.Bootnodes,
+		Bootnodes:    cfg.BootnodesV51,
 		Log:          cfg.Log,
 		ValidSchemes: cfg.ValidSchemes,
 	}
-	udp51, err := dv51.ListenV5(connv51, ln, v51Cfg)
+	udp51, err := dv51.ListenV5(connv51, ln51, v51Cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start discv 5.1: %v", err)
 	}

@@ -43,7 +43,7 @@ type Config struct {
 
 	// CATDOG HACK
 	Revalidator func(node2 *enode.Node) (uint64, error)
-	OnSeen func(n *enode.Node, at time.Time, liveness uint)
+	OnSeen      func(n *enode.Node, at time.Time, liveness uint)
 
 	// These settings are optional:
 	NetRestrict  *netutil.Netlist   // network whitelist

@@ -775,4 +775,3 @@ func (test *udpV5Test) close() {
 		test.t.Fatalf("%d unmatched UDP packets in queue", len(test.pipe.queue))
 	}
 }
-

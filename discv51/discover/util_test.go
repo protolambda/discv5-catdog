@@ -18,7 +18,7 @@ import (
 
 // shared test variables
 var (
-	testLocal          = v4wire.Endpoint{IP: net.ParseIP("3.3.3.3").To4(), UDP: 5, TCP: 6}
+	testLocal = v4wire.Endpoint{IP: net.ParseIP("3.3.3.3").To4(), UDP: 5, TCP: 6}
 )
 
 // dgramPipe is a fake UDP socket. It queues all sent datagrams.
