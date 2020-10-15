@@ -41,7 +41,7 @@ type BootnodeCmd struct {
 }
 
 func (b *BootnodeCmd) Help() string {
-	return "Run bootnode."
+	return "Run CATDOG bootnode. A friendly discovery bridging monster between v5.0 and v5.1."
 }
 
 func (b *BootnodeCmd) Default() {
