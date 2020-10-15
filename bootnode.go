@@ -198,8 +198,8 @@ func (c *BootnodeCmd) Run(ctx context.Context, args ...string) error {
 		NetRestrict:   nil,
 		BootnodesV50:  bootNodesv50,
 		BootnodesV51:  bootNodesv51,
-		LogV50:        mkLogger("[v5.0] "),
-		LogV51:        mkLogger("[v5.1] "),
+		LogV50:        mkLogger(fmt.Sprintf("\u001B[%dm[v5.0]\u001B[%dm ", 34, 0)),
+		LogV51:        mkLogger(fmt.Sprintf("\u001B[%dm[v5.1]\u001B[%dm ", 32, 0)),
 		ValidSchemes:  enode.ValidSchemes,
 	}
 	cd, err := catdog.NewCatDog(connv50, connv51, localNodev50, localNodev51, &cfg)
