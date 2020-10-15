@@ -1,9 +1,11 @@
 # Discovery v5 CATDOG
 
-This is a frankestein-eseque creation to help migrate Eth2 from disc v5.0 to v5.1.
+This is a frankenstein creation to help migrate Eth2 from disc v5.0 to v5.1.
 Hacked together by @protolambda, based on discord discussion.
 
 Have fun, this is not built for long-running usage, but should make migration more smooth.
+
+![CATDOG](CATDOG.jpeg)
 
 Modifications to both discovery version copies:
 - Strip out v4 files, no need to make it cat-dog-bird
