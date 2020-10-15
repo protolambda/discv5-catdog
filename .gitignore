@@ -14,3 +14,6 @@
 # testing bootnode local dbs
 *.db
 start.sh
+
+node_db_v50
+node_db_v51
