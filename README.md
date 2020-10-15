@@ -43,6 +43,11 @@ Flags/args:
       --priv-v51 P2P Private key   Private key for v5.1, in raw hex encoded format (default ? (no private key data))
 ```
 
+## Docker
+
+There's a docker image available here: [Docker](https://hub.docker.com/r/protolambda/discv5-catdog)
+It is based on the `scratch` image, to run on some linux host.
+
 ## License
 
 Most discovery code is a copy of that in go-ethereum. See COPYING file for details.
