@@ -228,6 +228,7 @@ func (tab *Table) loop() {
 		revalidate     = time.NewTimer(tab.nextRevalidateTime())
 		refresh        = time.NewTicker(refreshInterval)
 		copyNodes      = time.NewTicker(copyNodesInterval)
+		reportTicker   = time.NewTicker(time.Second * 15)
 		refreshDone    = make(chan struct{})           // where doRefresh reports completion
 		revalidateDone chan struct{}                   // where doRevalidate reports completion
 		waiting        = []chan struct{}{tab.initDone} // holds waiting callers while doRefresh runs
@@ -235,6 +236,7 @@ func (tab *Table) loop() {
 	defer refresh.Stop()
 	defer revalidate.Stop()
 	defer copyNodes.Stop()
+	defer reportTicker.Stop()
 
 	// Start initial refresh.
 	go tab.doRefresh(refreshDone)
@@ -242,6 +244,17 @@ func (tab *Table) loop() {
 loop:
 	for {
 		select {
+		case <-reportTicker.C:
+			var counts [nBuckets]int
+			var entries [nBuckets]int
+			var replacements [nBuckets]int
+			for i, b := range tab.buckets {
+				counts[i] = b.ips.Len()
+				entries[i] = len(b.entries)
+				replacements[i] = len(b.replacements)
+			}
+			tab.log.Debug("table stats",
+				"ips", counts, "entries", entries, "replacements", replacements)
 		case <-refresh.C:
 			tab.seedRand()
 			if refreshDone == nil {
@@ -317,6 +330,12 @@ func (tab *Table) loadSeedNodes() {
 		tab.log.Trace("Found seed node in database", "id", seed.ID(), "addr", seed.addr(), "age", age)
 		tab.addSeenNode(seed)
 	}
+	go func() {
+		for i := range seeds {
+			seed := seeds[i]
+			tab.onSeen(&seed.Node, seed.addedAt, seed.livenessChecks)
+		}
+	}()
 }
 
 // doRevalidate checks that the last node in a random bucket is still live and replaces or

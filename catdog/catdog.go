@@ -47,16 +47,12 @@ func (cd *CatDog) Revalidate(n *enode.Node) (uint64, error) {
 
 func (cd *CatDog) OnSeenV50(n *enode.Node, at time.Time, liveness uint) {
 	<-cd.init
-	// TODO: just a guess: instead of adding like any node, put it in front of the bucket.
-	// Migrating nodes need an extra hand, right?
-	cd.UDPv51.AddRecentNode(n, at, liveness) // add to the other table
+	cd.UDPv51.SeeNode(n, at, liveness) // add to the other table
 }
 
 func (cd *CatDog) OnSeenV51(n *enode.Node, at time.Time, liveness uint) {
 	<-cd.init
-	// TODO: just a guess: instead of adding like any node, put it in front of the bucket.
-	// Migrating nodes need an extra hand, right?
-	cd.UDPv50.AddRecentNode(n, at, liveness) // add to the other table
+	cd.UDPv50.SeeNode(n, at, liveness) // add to the other table
 }
 
 func NewCatDog(connv50 gdv5.UDPConn, connv51 gdv5.UDPConn,
