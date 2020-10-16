@@ -3,6 +3,7 @@ module github.com/protolambda/discv5-catdog
 go 1.15
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/ethereum/go-ethereum v1.9.23-0.20201014102817-524aaf5ec658
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/protolambda/ask v0.0.5

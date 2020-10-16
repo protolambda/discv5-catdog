@@ -206,6 +206,29 @@ func (c *BootnodeCmd) Run(ctx context.Context, args ...string) error {
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		crawlLog := mkLogger("[crawl v5.1] ")
+		r51 := cd.UDPv51.RandomNodes()
+		for r51.Next() {
+			n := r51.Node()
+			crawlLog.Debug("found node", "node", n.ID(), "ip", n.IP())
+			time.Sleep(5 * time.Second)
+		}
+		crawlLog.Debug("stopped")
+	}()
+
+	go func() {
+		crawlLog := mkLogger("[crawl v5.0] ")
+		r50 := cd.UDPv50.RandomNodes()
+		for r50.Next() {
+			n := r50.Node()
+			crawlLog.Debug("found node", "node", n.ID(), "ip", n.IP())
+			time.Sleep(5 * time.Second)
+		}
+		crawlLog.Debug("stopped")
+	}()
+
 	defer cd.UDPv50.Close()
 	defer cd.UDPv51.Close()
 	<-ctx.Done()

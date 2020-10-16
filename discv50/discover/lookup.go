@@ -164,7 +164,9 @@ func (it *lookup) query(n *node, reply chan<- []*node) {
 	// Grab as many nodes as possible. Some of them might not be alive anymore, but we'll
 	// just remove those again during revalidation.
 	for _, n := range r {
-		it.tab.onSeen(&n.Node, n.addedAt, n.livenessChecks)
+		if it.tab.onSeen != nil {
+			it.tab.onSeen(&n.Node, n.addedAt, n.livenessChecks)
+		}
 		it.tab.addSeenNode(n)
 	}
 	reply <- r

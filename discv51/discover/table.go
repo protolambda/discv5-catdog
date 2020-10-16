@@ -333,7 +333,9 @@ func (tab *Table) loadSeedNodes() {
 	go func() {
 		for i := range seeds {
 			seed := seeds[i]
-			tab.onSeen(&seed.Node, seed.addedAt, seed.livenessChecks)
+			if tab.onSeen != nil {
+				tab.onSeen(&seed.Node, seed.addedAt, seed.livenessChecks)
+			}
 		}
 	}()
 }
